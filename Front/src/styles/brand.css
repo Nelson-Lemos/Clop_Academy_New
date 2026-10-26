@@ -1,0 +1,219 @@
+:root {
+  --clop-black: #050505;
+  --clop-black-soft: #0b0a08;
+  --clop-black-lift: #12100b;
+  --clop-ink: #171208;
+  --clop-gold: #c9a227;
+  --clop-gold-bright: #f4cc48;
+  --clop-gold-pale: #f6e7b8;
+  --clop-bronze: #8a6a23;
+  --clop-olive: #9aaa47;
+  --clop-cream: #f7f2e6;
+  --clop-cream-deep: #efe5d0;
+  --clop-muted: #7a7364;
+  --clop-line: rgba(201, 162, 39, 0.24);
+  --clop-line-soft: rgba(247, 242, 230, 0.12);
+  --font-display: 'Palatino Linotype', 'Book Antiqua', Palatino, 'Times New Roman', Georgia, serif;
+  --font-ui: Inter, 'Segoe UI', Arial, sans-serif;
+  --ease-out: cubic-bezier(0.22, 0.78, 0.16, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--clop-black);
+  color: var(--clop-ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  color: var(--clop-black);
+  background: var(--clop-gold-bright);
+}
+
+/* ------------------------------------------------------------------ */
+/* Assinatura de marca                                                 */
+/* ------------------------------------------------------------------ */
+.clop-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--clop-ink);
+  text-decoration: none;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.clop-brand:hover {
+  text-decoration: none;
+}
+
+.clop-brand__emblem {
+  width: var(--brand-emblem-size, 46px);
+  height: var(--brand-emblem-size, 46px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(201, 162, 39, 0.22));
+  transition: transform 600ms var(--ease-out);
+}
+
+.clop-brand:hover .clop-brand__emblem {
+  transform: rotate(-4deg) scale(1.04);
+}
+
+.clop-brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clop-brand__text strong {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  line-height: 0.9;
+}
+
+.clop-brand__text span {
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.66;
+}
+
+.clop-brand--light {
+  color: var(--clop-cream);
+}
+
+.clop-brand--light .clop-brand__text span {
+  color: var(--clop-gold-bright);
+  opacity: 0.9;
+}
+
+.clop-brand--dark {
+  color: var(--clop-ink);
+}
+
+.clop-brand--dark .clop-brand__text span {
+  color: var(--clop-bronze);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Movimento partilhado                                                */
+/* ------------------------------------------------------------------ */
+@keyframes clop-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes clop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes clop-line-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes clop-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes clop-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes clop-glow {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes clop-shimmer {
+  0% {
+    background-position: -180% 50%;
+  }
+  100% {
+    background-position: 280% 50%;
+  }
+}
+
+@keyframes clop-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes clop-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes clop-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
