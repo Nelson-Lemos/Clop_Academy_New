@@ -50,6 +50,14 @@ migração, execute `python seed.py --sem-demo` uma vez num ambiente confiável
 com as variáveis de produção. Não execute `python seed.py` em produção, pois
 esse comando também cria conteúdo de demonstração.
 
+As definições não secretas da aplicação (tentativas de login, duração dos
+tokens, contactos da instituição, limites de upload e timeouts) já estão no
+Blueprint. Só têm de ser fornecidos no Render os URLs do Neon, `SECRET_KEY` e
+`SEED_ADMIN_PASSWORD`. Os uploads no plano gratuito usam armazenamento
+temporário (`/tmp`) e podem desaparecer quando o serviço reiniciar; para
+guardar comprovativos de forma persistente, configure armazenamento de objectos
+antes de ativar uploads em produção.
+
 Depois do primeiro deploy da API, copie o domínio público atribuído pelo Render
 (por exemplo, `https://clop-academy-api.onrender.com`). No projeto da Vercel,
 adicione `VITE_API_URL` com esse domínio seguido de `/api`, em Production e

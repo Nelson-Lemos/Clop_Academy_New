@@ -1,7 +1,8 @@
-const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(
-  /\/+$/,
-  '',
-)
+const API_BASE = (
+  import.meta.env.PROD
+    ? 'https://clop-academy-new.onrender.com/api'
+    : (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api')
+).replace(/\/+$/, '')
 
 const ACCESS_KEY = 'clop:access'
 const REFRESH_KEY = 'clop:refresh'

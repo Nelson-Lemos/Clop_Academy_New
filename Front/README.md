@@ -48,10 +48,12 @@ O routing é feito por `window.location.hash`, sem `react-router`:
 O cliente da API está em `src/lib/api.ts`.
 
 ```text
-VITE_API_URL=http://localhost:8000/api
+VITE_API_URL=https://clop-academy-new.onrender.com/api
 ```
 
-Se a variável não estiver definida, o valor por omissão é `http://localhost:8000/api`.
+Em produção, o frontend usa diretamente a API pública do Render. Para
+desenvolvimento local, defina a variável em `.env` como
+`http://localhost:8000/api`.
 
 Endpoints utilizados:
 

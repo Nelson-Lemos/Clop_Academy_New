@@ -12,6 +12,16 @@ services:
         value: production
       - key: DEBUG
         value: "false"
+      - key: PROJECT_NAME
+        value: CLOP Academy
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: LOGIN_MAX_ATTEMPTS
+        value: "5"
+      - key: LOGIN_LOCK_MINUTES
+        value: "15"
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_URL_UNPOOLED
@@ -22,5 +32,29 @@ services:
         value: https://clop-academy.vercel.app
       - key: PUBLIC_SITE_URL
         value: https://clop-academy.vercel.app
+      - key: UPLOAD_DIR
+        value: /tmp/clop-academy/uploads
+      - key: MAX_UPLOAD_MB
+        value: "10"
+      - key: SEED_ADMIN_EMAIL
+        value: admin@clop.academy
+      - key: SEED_ADMIN_NAME
+        value: Administrador CLOP
       - key: SEED_ADMIN_PASSWORD
         sync: false
+      - key: INSTITUTION_NAME
+        value: CLOP Academia Digital, LDA.
+      - key: INSTITUTION_AREA
+        value: Educação Financeira & Mercados
+      - key: INSTITUTION_ADDRESS
+        value: Kinaxixi, Rua da Missão, Edifício 93, Apartamento 8A, Luanda, Angola
+      - key: INSTITUTION_UNITEL
+        value: 994 365 4853
+      - key: INSTITUTION_AFRICELL
+        value: 955 517 094
+      - key: INSTITUTION_EMAIL
+        value: infocloptrader@gmail.com
+      - key: MARKET_CACHE_TTL_SECONDS
+        value: "300"
+      - key: MARKET_REQUEST_TIMEOUT_SECONDS
+        value: "10"
