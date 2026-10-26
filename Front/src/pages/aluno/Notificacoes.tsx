@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { alunoApi } from '../../lib/api'
 
-export default function Notificacoes({ user }: { user: any }) {
+export default function Notificacoes() {
   const [notificacoes, setNotificacoes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

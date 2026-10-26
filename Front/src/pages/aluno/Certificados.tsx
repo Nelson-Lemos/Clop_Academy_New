@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { alunoApi } from '../../lib/api'
 
-export default function Certificados({ user }: { user: any }) {
+export default function Certificados() {
   const [certificados, setCertificados] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

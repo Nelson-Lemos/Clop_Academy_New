@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { alunoApi } from '../../lib/api'
 
-export default function Avaliacoes({ user }: { user: any }) {
+export default function Avaliacoes() {
   const [avaliacoes, setAvaliacoes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

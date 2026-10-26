@@ -135,28 +135,27 @@ export default function App() {
 
   // Rotas do aluno
   if (route === 'dashboard') return <AlunoDashboard user={user!} />
-  if (route === 'inscricoes') return <MinhasInscricoes user={user!} />
+  if (route === 'inscricoes') return <MinhasInscricoes />
   if (route === 'curso-conteudo')
-    return <ConteudoCurso courseId={Number(routeState.params.id)} user={user!} />
+    return <ConteudoCurso courseId={Number(routeState.params.id)} />
   if (route === 'curso-aula')
     return (
       <DetalheAula
         courseId={Number(routeState.params.courseId)}
         lessonId={Number(routeState.params.lessonId)}
-        user={user!}
       />
     )
-  if (route === 'avaliacoes') return <Avaliacoes user={user!} />
+  if (route === 'avaliacoes') return <Avaliacoes />
   if (route === 'avaliacao-detalhe')
-    return <DetalheAvaliacao assessmentId={Number(routeState.params.id)} user={user!} />
-  if (route === 'pagamentos') return <Pagamentos user={user!} />
-  if (route === 'certificados') return <Certificados user={user!} />
-  if (route === 'notificacoes') return <Notificacoes user={user!} />
-  if (route === 'perfil') return <Perfil user={user!} />
+    return <DetalheAvaliacao assessmentId={Number(routeState.params.id)} />
+  if (route === 'pagamentos') return <Pagamentos />
+  if (route === 'certificados') return <Certificados />
+  if (route === 'notificacoes') return <Notificacoes />
+  if (route === 'perfil') return <Perfil />
 
   // Rotas de admin
   if (route === 'admin-dashboard') return <AdminDashboard user={user!} />
-  if (route === 'admin-cursos') return <AdminCursos user={user!} />
+  if (route === 'admin-cursos') return <AdminCursos />
 
   return <AcademyHome onLogout={logout} />
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { alunoApi, type ConteudoCurso } from '../../lib/api'
 
-export default function ConteudoCurso({ courseId, user }: { courseId: number; user: any }) {
+export default function ConteudoCurso({ courseId }: { courseId: number }) {
   const [conteudo, setConteudo] = useState<ConteudoCurso | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

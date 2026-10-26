@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { adminApi } from '../../lib/api'
 
-export default function AdminCursos({ user }: { user: any }) {
+export default function AdminCursos() {
   const [cursos, setCursos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

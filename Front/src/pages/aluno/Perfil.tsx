@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { authApi } from '../../lib/api'
 
-export default function Perfil({ user }: { user: any }) {
+export default function Perfil() {
   const [perfil, setPerfil] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -9,7 +9,7 @@ export default function Perfil({ user }: { user: any }) {
   useEffect(() => {
     let active = true
     authApi.me()
-      .then((res) => { if (active) setPerfil(res.user) })
+      .then((res) => { if (active) setPerfil(res) })
       .catch(() => { if (active) setError('Não foi possível carregar o perfil.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
