@@ -1,55 +1,110 @@
 import { useEffect, useState } from 'react'
-import { alunoApi } from '../../lib/api'
+import { Award, BadgeCheck, CalendarDays, GraduationCap, Hash } from 'lucide-react'
+import { alunoApi, type CertificadoAluno } from '../../lib/api'
+import { PageHeader } from '../../components/PageHeader'
+import { EmptyState } from '../../components/EmptyState'
+import { ErrorState } from '../../components/ErrorState'
+import { LoadingState } from '../../components/LoadingState'
+import { estadoLabel, estadoTone, formatDate } from '../../lib/labels'
 
 export default function Certificados() {
-  const [certificados, setCertificados] = useState<any[]>([])
+  const [certificados, setCertificados] = useState<CertificadoAluno[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
-    alunoApi.getCertificados()
-      .then((data) => { if (active) setCertificados(data) })
-      .catch(() => { if (active) setError('Não foi possível carregar os certificados.') })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [])
+    setLoading(true)
+    setError(null)
 
-  if (loading) return <div className="clop-loader">A carregar…</div>
-  if (error) return <div className="clop-erro">{error}</div>
+    alunoApi
+      .getCertificados()
+      .then((data) => {
+        if (active) setCertificados(data)
+      })
+      .catch(() => {
+        if (active) setError('Não foi possível carregar os certificados.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [reloadKey])
 
   return (
-    <div className="clop-pagina">
-      <header className="clop-pagina__cabecalho">
-        <h1>Meus Certificados</h1>
-        <a href="#/dashboard" className="clop-btn clop-btn--ghost">← Dashboard</a>
-      </header>
+    <>
+      <PageHeader
+        eyebrow="Certificação"
+        title="Certificados"
+        description="Certificados emitidos após a conclusão dos requisitos de cada curso."
+      />
 
-      {certificados.length === 0 ? (
-        <div className="clop-vazio">
-          <p>Nenhum certificado emitido ainda.</p>
-          <p className="clop-destaque-secundario">Conclua um curso para receber o seu certificado.</p>
-        </div>
-      ) : (
-        <div className="clop-lista-certificados">
-          {certificados.map((c) => (
-            <div key={c.id} className="clop-card-certificado">
-              <div className="clop-card-certificado__cabecalho">
-                <h3>{c.curso_nome}</h3>
-                <span className={`clop-badge clop-badge--${c.estado.toLowerCase()}`}>{c.estado}</span>
+      {loading && <LoadingState label="A carregar certificados…" />}
+      {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((key) => key + 1)} />}
+
+      {!loading && !error && certificados.length === 0 && (
+        <EmptyState
+          icon={Award}
+          title="Ainda não tem certificados"
+          description="Conclua um curso e cumpra os requisitos de avaliação para solicitar a emissão do certificado."
+          action={
+            <a className="btn btn--gold btn--sm" href="#/inscricoes">
+              Ver os meus cursos
+            </a>
+          }
+        />
+      )}
+
+      {!loading && !error && certificados.length > 0 && (
+        <div className="cert-grid">
+          {certificados.map((certificado) => (
+            <article key={certificado.id} className="cert-card">
+              <span className="cert-card__ribbon" aria-hidden="true" />
+              <div className="cert-card__head">
+                <span className="cert-card__seal" aria-hidden="true">
+                  <BadgeCheck size={22} />
+                </span>
+                <span className={`badge badge--${estadoTone(certificado.estado)}`}>
+                  {estadoLabel(certificado.estado)}
+                </span>
               </div>
-              <div className="clop-card-certificado__codigo">
-                <strong>Código:</strong> {c.codigo}
+
+              <p className="cert-card__eyebrow">CLOP Academia Digital</p>
+              <h3 className="cert-card__title">{certificado.curso_nome || 'Curso'}</h3>
+
+              <dl className="cert-card__meta">
+                <div>
+                  <dt>
+                    <GraduationCap size={14} aria-hidden="true" /> Aluno
+                  </dt>
+                  <dd>{certificado.aluno_nome || '—'}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <CalendarDays size={14} aria-hidden="true" /> Emitido em
+                  </dt>
+                  <dd>{formatDate(certificado.emitido_em)}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <Award size={14} aria-hidden="true" /> Nota final
+                  </dt>
+                  <dd>{certificado.nota_final ?? '—'}</dd>
+                </div>
+              </dl>
+
+              <div className="cert-code">
+                <Hash size={14} aria-hidden="true" />
+                <span className="mono">{certificado.codigo}</span>
               </div>
-              <div className="clop-card-certificado__detalhes">
-                <span>Aluno: {c.aluno_nome}</span>
-                <span>Emitido em: {new Date(c.emitido_em).toLocaleDateString()}</span>
-                {c.nota_final !== null && <span>Nota final: {c.nota_final}</span>}
-              </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
-    </div>
+    </>
   )
 }

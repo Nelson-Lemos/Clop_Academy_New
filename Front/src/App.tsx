@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import AcademyHome from './pages/AcademyHome'
 import AuthScreen from './pages/AuthScreen'
 import AlunoDashboard from './pages/aluno/AlunoDashboard'
@@ -13,8 +13,10 @@ import Notificacoes from './pages/aluno/Notificacoes'
 import Perfil from './pages/aluno/Perfil'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminCursos from './pages/admin/AdminCursos'
-import './styles/brand.css'
+import { AppShell } from './components/AppShell'
+import { BrandMark } from './components/BrandMark'
 import { useAuth } from './contexts/AuthContext'
+import './styles/brand.css'
 
 type Route =
   | 'home'
@@ -34,6 +36,21 @@ type Route =
   | 'admin-cursos'
 
 const HOME_TITLE = 'CLOP Academia Digital — Educação Financeira & Mercados'
+
+const PRIVATE_TITLES: Partial<Record<Route, string>> = {
+  dashboard: 'Visão geral — CLOP Academia Digital',
+  inscricoes: 'Meus cursos — CLOP Academia Digital',
+  'curso-conteudo': 'Curso — CLOP Academia Digital',
+  'curso-aula': 'Aula — CLOP Academia Digital',
+  avaliacoes: 'Avaliações — CLOP Academia Digital',
+  'avaliacao-detalhe': 'Avaliação — CLOP Academia Digital',
+  pagamentos: 'Pagamentos — CLOP Academia Digital',
+  certificados: 'Certificados — CLOP Academia Digital',
+  notificacoes: 'Notificações — CLOP Academia Digital',
+  perfil: 'Perfil — CLOP Academia Digital',
+  'admin-dashboard': 'Painel de gestão — CLOP Academia Digital',
+  'admin-cursos': 'Gestão de cursos — CLOP Academia Digital',
+}
 
 function parseHash(): { route: Route; params: Record<string, string> } {
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase()
@@ -78,7 +95,7 @@ function parseHash(): { route: Route; params: Record<string, string> } {
 }
 
 function requiresAuth(route: Route): boolean {
-  const publicRoutes = ['home', 'login', 'register']
+  const publicRoutes: Route[] = ['home', 'login', 'register']
   return !publicRoutes.includes(route)
 }
 
@@ -106,15 +123,21 @@ export default function App() {
     }
   }, [routeState.route])
 
+  const { route } = routeState
+
+  useEffect(() => {
+    if (PRIVATE_TITLES[route]) document.title = PRIVATE_TITLES[route] as string
+  }, [route])
+
   if (loading) {
     return (
-      <div className="clop-page clop-page--center">
-        <div className="clop-loader">A carregar sessão…</div>
+      <div className="app-boot">
+        <BrandMark theme="light" href="#inicio" emblemSize={58} />
+        <span className="spinner" aria-hidden="true" />
+        <p>A carregar sessão…</p>
       </div>
     )
   }
-
-  const { route } = routeState
 
   // Redireciona para login se tentar aceder a rota privada sem sessão
   if (requiresAuth(route) && !isAuthenticated) {
@@ -133,29 +156,58 @@ export default function App() {
   if (route === 'login') return <AuthScreen mode="login" />
   if (route === 'register') return <AuthScreen mode="register" />
 
-  // Rotas do aluno
-  if (route === 'dashboard') return <AlunoDashboard user={user!} />
-  if (route === 'inscricoes') return <MinhasInscricoes />
-  if (route === 'curso-conteudo')
-    return <ConteudoCurso courseId={Number(routeState.params.id)} />
-  if (route === 'curso-aula')
-    return (
-      <DetalheAula
-        courseId={Number(routeState.params.courseId)}
-        lessonId={Number(routeState.params.lessonId)}
-      />
-    )
-  if (route === 'avaliacoes') return <Avaliacoes />
-  if (route === 'avaliacao-detalhe')
-    return <DetalheAvaliacao assessmentId={Number(routeState.params.id)} />
-  if (route === 'pagamentos') return <Pagamentos />
-  if (route === 'certificados') return <Certificados />
-  if (route === 'notificacoes') return <Notificacoes />
-  if (route === 'perfil') return <Perfil />
+  if (!user) return null
 
-  // Rotas de admin
-  if (route === 'admin-dashboard') return <AdminDashboard user={user!} />
-  if (route === 'admin-cursos') return <AdminCursos />
+  let page: ReactNode
+  switch (route) {
+    case 'dashboard':
+      page = <AlunoDashboard user={user} />
+      break
+    case 'inscricoes':
+      page = <MinhasInscricoes />
+      break
+    case 'curso-conteudo':
+      page = <ConteudoCurso courseId={Number(routeState.params.id)} />
+      break
+    case 'curso-aula':
+      page = (
+        <DetalheAula
+          courseId={Number(routeState.params.courseId)}
+          lessonId={Number(routeState.params.lessonId)}
+        />
+      )
+      break
+    case 'avaliacoes':
+      page = <Avaliacoes />
+      break
+    case 'avaliacao-detalhe':
+      page = <DetalheAvaliacao assessmentId={Number(routeState.params.id)} />
+      break
+    case 'pagamentos':
+      page = <Pagamentos />
+      break
+    case 'certificados':
+      page = <Certificados />
+      break
+    case 'notificacoes':
+      page = <Notificacoes />
+      break
+    case 'perfil':
+      page = <Perfil />
+      break
+    case 'admin-dashboard':
+      page = <AdminDashboard user={user} />
+      break
+    case 'admin-cursos':
+      page = <AdminCursos />
+      break
+    default:
+      page = <AlunoDashboard user={user} />
+  }
 
-  return <AcademyHome onLogout={logout} />
+  return (
+    <AppShell user={user} route={route} onLogout={logout}>
+      {page}
+    </AppShell>
+  )
 }

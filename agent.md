@@ -1,10 +1,10 @@
 # CLOP Academy — Análise Completa do Projecto
 
 > Documento de referência técnica e funcional do repositório **CLOP-Academy**.
-> Actualizado em **25 de Outubro de 2026**, após a reconstrução da identidade visual do frontend.
-> Âmbito desta análise: portal institucional, autenticação, API FastAPI, modelo de dados, segurança, estado de qualidade e próximos passos.
+> Actualizado em **26 de Outubro de 2026**, após a reconstrução da plataforma autenticada (shell, dashboards e módulos).
+> Âmbito desta análise: portal institucional, autenticação, área do aluno, administração, API FastAPI, modelo de dados, segurança, estado de qualidade e próximos passos.
 >
-> **Estado resumido:** frontend React reconstruído e a compilar; API FastAPI implementada mas **não executada nesta sessão** (servidor local indisponível); integração real de login/registo preparada, porém ainda não validada em runtime.
+> **Estado resumido:** portal institucional, autenticação e plataforma autenticada (aluno e administração) reconstruídos com identidade preto/ouro; `tsc -b && vite build` e `oxlint` passam. A API FastAPI está implementada mas **não foi executada nesta sessão** (servidor local indisponível); a integração real está preparada, mas continua por validar em runtime.
 
 ---
 
@@ -14,12 +14,12 @@ O repositório contém dois produtos independentes que partilham o mesmo domíni
 
 | Componente | Tecnologia | Estado |
 | --- | --- | --- |
-| `Front/` | React 19 + TypeScript + Vite 8 | Portal institucional e ecrãs de autenticação reconstruídos com identidade preto/ouro; build e lint passam |
+| `Front/` | React 19 + TypeScript + Vite 8 | Portal institucional, autenticação e plataforma autenticada (aluno e administração) reconstruídos com identidade preto/ouro; build e lint passam |
 | `backend/` | FastAPI + SQLAlchemy 2 + MySQL + Alembic | API LMS/institucional completa em código, com autenticação JWT, permissões, cursos, pagamentos, avaliações, certificados, mercados e auditoria |
 
 O frontend deixou de ser uma página estática: passou a ter **routing por hash**, **formulário de login e registo ligado à API**, **intro cinematográfica** baseada no vídeo da marca e um **portal institucional re-tematizado** a partir do logótipo oficial.
 
-O backend é substancialmente mais amplo do que aquilo que o frontend consome actualmente. Existe uma API pública (`/api/public/*`), uma área de aluno (`/api/aluno/*`) e uma área administrativa (`/api/admin/*`) com cerca de 80 endpoints. O frontend usa, para já, apenas os endpoints de autenticação.
+O backend é substancialmente mais amplo do que aquilo que o frontend consome actualmente. Existe uma API pública (`/api/public/*`), uma área de aluno (`/api/aluno/*`) e uma área administrativa (`/api/admin/*`) com cerca de 80 endpoints. O frontend já consome autenticação, dashboard do aluno, inscrições, conteúdos, aulas, progresso, avaliações, pagamentos, certificados, notificações, perfil e os dois endpoints administrativos disponíveis (dashboard e cursos); o catálogo público do portal continua estático.
 
 ### Principais conclusões
 
@@ -66,13 +66,16 @@ CLOP-Academy/
 │  ├─ public/brand/             # activos derivados da marca
 │  └─ src/
 │     ├─ main.tsx               # bootstrap React
-│     ├─ App.tsx                # router por hash
-│     ├─ components/BrandMark.tsx
+│     ├─ App.tsx                # router por hash + shell autenticado
+│     ├─ components/            # AppShell, PageHeader, StatCard, estados, BrandMark
 │     ├─ config/institution.ts  # fonte única de contactos e assinatura
 │     ├─ lib/api.ts             # cliente HTTP + sessão
+│     ├─ lib/labels.ts          # tradução de estados, datas e valores
 │     ├─ pages/AcademyHome.tsx  # portal institucional
 │     ├─ pages/AuthScreen.tsx   # login/registo + intro
-│     └─ styles/                # brand.css, academy.css, auth.css
+│     ├─ pages/aluno/           # dashboard, cursos, aulas, avaliações, certificados…
+│     ├─ pages/admin/           # dashboard administrativo e gestão de cursos
+│     └─ styles/                # brand.css, academy.css, auth.css, dashboard.css
 └─ backend/
    ├─ app/
    │  ├─ main.py                # FastAPI, CORS, handlers, routers
@@ -92,7 +95,7 @@ CLOP-Academy/
    └─ .env.example
 ```
 
-O projecto **não é um repositório Git** nesta máquina. O `.gitignore` já está preparado para Python, Node, ambientes virtuais, builds, uploads e segredos.
+O projecto é um repositório Git com remoto em `github.com/Nelson-Lemos/Clop_Academy_New` (branch `main`), e a Vercel compila a partir desse remoto com raiz de projecto em `Front`. O `.gitignore` está preparado para Python, Node, ambientes virtuais, builds, uploads e segredos.
 
 ---
 
@@ -342,6 +345,64 @@ Tratamento de erros:
 - O frontend não expõe stack traces nem detalhes internos.
 
 O cliente está preparado para renovação de token, mas a renovação só é exercitada em `/auth/me`; chamadas futuras devem reutilizar o mesmo padrão.
+
+### 4.8 Plataforma autenticada — shell e módulos
+
+A área reservada deixou de ser um conjunto de páginas isoladas e passou a ter uma **estrutura de aplicação** consistente.
+
+**Shell (`components/AppShell.tsx`)**
+
+- Navegação lateral persistente com identidade CLOP (preto, ouro, creme), agrupada por contexto: *Aprendizagem* (aluno) ou *Gestão* (administração).
+- Itens de aluno: Visão geral, Meus cursos, Avaliações, Certificados, Pagamentos, Notificações e Perfil.
+- Itens de gestão: Painel de gestão e Gestão de cursos, mostrados conforme o `role` (`ADMIN`, `SUPERADMIN`, `EDITOR`, `FINANCE`, `INSTRUCTOR`).
+- Barra superior com breadcrumb, atalho para o site institucional, notificações (aluno) e identificação do utilizador.
+- Gaveta móvel com *scrim*, fecho por `Escape` e fecho automático na mudança de rota.
+- Rodapé institucional e ligação “Voltar ao site”.
+
+**Sistema visual (`styles/dashboard.css`)**
+
+- Paleta própria da aplicação (`--app-*`) assente nos tokens da marca (`--clop-*`), com superfícies creme, cartões claros e acentos ouro.
+- Componentes reutilizáveis: `.app-card`, `.stat-card`, `.badge`, `.progress`, `.app-table`, `.toolbar`, `.filter-chip`, `.empty-state`, `.error-state`, `.skeleton`.
+- Tipografia: serifa da marca nos títulos, sans-serif na interface.
+- Estados de foco visíveis, *skeletons* de carregamento, estados vazios com acção e mensagens de erro com nova tentativa.
+- Responsividade em 1180 px (grelhas a uma coluna), 1024 px (sidebar off-canvas), 720 px e 520 px.
+- Respeito por `prefers-reduced-motion`.
+
+**Módulos do aluno**
+
+| Rota | Ecrã | Conteúdo principal |
+| --- | --- | --- |
+| `#/dashboard` | Visão geral | Hero de retoma com anel de progresso, 4 KPIs, cartões de curso, próximas aulas e notificações recentes |
+| `#/inscricoes` | Meus cursos | Filtros por estado, pesquisa, tabela com progresso e acções |
+| `#/cursos/:id` | Sala de aula | Currículo em módulos expansíveis, resumo lateral com progresso e CTA para a próxima aula |
+| `#/aulas/:courseId/:lessonId` | Aula | Vídeo/conteúdo, materiais, estado e marcação de conclusão |
+| `#/avaliacoes` | Avaliações | Cartões com estado, tentativas, nota mínima e última nota |
+| `#/avaliacoes/:id` | Avaliação | Perguntas numeradas, progresso de respostas, submissão e ecrã de resultado |
+| `#/pagamentos` | Pagamentos | Resumo de valores e tabela de referências |
+| `#/certificados` | Certificados | Cartões com selo, código, nota e data de emissão |
+| `#/notificacoes` | Notificações | Filtro “todas / não lidas”, marcação individual e global |
+| `#/perfil` | Perfil | Hero de conta, dados pessoais, perfil de aluno, objectivo/biografia e estado da conta |
+
+**Módulos de administração**
+
+| Rota | Ecrã | Conteúdo principal |
+| --- | --- | --- |
+| `#/admin/dashboard` | Painel de gestão | 6 KPIs, gráfico de barras de inscrições por curso, resumo operacional e acções rápidas |
+| `#/admin/cursos` | Gestão de cursos | Filtros por estado de publicação, pesquisa e tabela do catálogo |
+
+**Componentes transversais**
+
+- `PageHeader` — eyebrow, título, descrição e acções.
+- `StatCard` — KPI com ícone, valor, contexto e tom.
+- `EmptyState` / `ErrorState` / `LoadingState` / `DashboardSkeleton`.
+- `lib/labels.ts` — tradução de estados, funções, datas, moeda (AOA) e iniciais.
+
+**Notas de implementação**
+
+- Não foram adicionadas dependências: os ícones usam `lucide-react`, já presente.
+- O perfil é apenas de leitura porque o cliente não expõe endpoint de actualização de perfil.
+- A submissão de avaliação volta a pedir o detalhe após o `POST`, para apresentar a nota corrigida pelo servidor.
+- Os dados continuam a vir exclusivamente da API; não foram introduzidos valores fictícios.
 
 ---
 
