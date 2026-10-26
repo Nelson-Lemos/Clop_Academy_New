@@ -128,5 +128,5 @@ def to_course_detail(db: Session, curso: Course) -> CourseDetailOut:
             for turma in curso.turmas
         ],
         percentagem_conclusao_minima=curso.percentagem_conclusao_minima,
-        aulas_obrigatorias_minimas=curso.aulas_obrigatorias_minima,
+        aulas_obrigatorias_minimas=curso.aulas_obrigatorias_minimas,
     )

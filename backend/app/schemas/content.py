@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, EmailStr, Field
 
 
 class CategoryOut(BaseModel):
@@ -158,7 +158,9 @@ class EventRegistrationOut(BaseModel):
     email: EmailStr
     telefone: str | None = None
     estado: str
-    criado_em: datetime
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
 
 
 class CampaignOut(BaseModel):
@@ -181,7 +183,9 @@ class CampaignOut(BaseModel):
 class CampaignAdminOut(CampaignOut):
     visualizacoes: int = 0
     cliques: int = 0
-    criado_em: datetime
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
 
 
 class CampaignCreate(BaseModel):

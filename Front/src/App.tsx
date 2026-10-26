@@ -99,6 +99,14 @@ function requiresAuth(route: Route): boolean {
   return !publicRoutes.includes(route)
 }
 
+function dashboardRoute(userRole: string): string {
+  return ['ADMIN', 'SUPERADMIN', 'INSTRUCTOR', 'EDITOR', 'FINANCE'].includes(
+    userRole.toUpperCase(),
+  )
+    ? '#/admin/dashboard'
+    : '#/dashboard'
+}
+
 export default function App() {
   const { user, loading, isAuthenticated, logout } = useAuth()
   const [routeState, setRouteState] = useState(parseHash())
@@ -147,7 +155,7 @@ export default function App() {
 
   // Redireciona para dashboard se usuário autenticado tentar ir para login/registro
   if ((route === 'login' || route === 'register') && isAuthenticated) {
-    window.location.hash = '#/dashboard'
+    window.location.hash = dashboardRoute(user?.role ?? '')
     return null
   }
 

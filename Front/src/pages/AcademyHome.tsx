@@ -166,6 +166,17 @@ export default function AcademyHome({ onLogout }: { onLogout?: () => void } = {}
       <main>
         <section className="academy-hero" id="inicio">
           <div className="academy-hero__backdrop" aria-hidden="true">
+            <video
+              className="academy-hero__film"
+              src="/brand/clop-brand-film.mp4"
+              poster="/brand/clop-brand-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <span className="academy-hero__scrim" />
             <span className="academy-hero__glow" />
             <span className="academy-hero__grid" />
           </div>
@@ -202,40 +213,6 @@ export default function AcademyHome({ onLogout }: { onLogout?: () => void } = {}
               <a className="academy-hero__scroll" href="#sobre">
                 Conhecer a instituição <ArrowDown size={15} aria-hidden="true" />
               </a>
-            </div>
-
-            <div className="academy-hero__art" aria-hidden="true">
-              <span className="academy-hero__halo" />
-              <span className="academy-hero__orbit academy-hero__orbit--outer" />
-              <span className="academy-hero__orbit academy-hero__orbit--inner" />
-              <img
-                className="academy-hero__watermark"
-                src="/brand/clop-emblem.png"
-                alt=""
-                decoding="async"
-              />
-
-              <div className="academy-hero__frame">
-                <video
-                  className="academy-hero__film"
-                  src="/brand/clop-brand-film.mp4"
-                  poster="/brand/clop-brand-poster.jpg"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-                <span className="academy-hero__frame-grain" />
-                <div className="academy-hero__frame-meta">
-                  <span>CLOP · brand film</span>
-                  <span>00:08</span>
-                </div>
-              </div>
-
-              <span className="academy-hero__tag academy-hero__tag--a">Análise</span>
-              <span className="academy-hero__tag academy-hero__tag--b">Estratégia</span>
-              <span className="academy-hero__tag academy-hero__tag--c">Resultados</span>
             </div>
           </div>
 

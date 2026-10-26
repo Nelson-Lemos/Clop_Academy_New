@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -119,3 +120,14 @@ def root() -> dict:
 @app.get(f"{settings.API_PREFIX}/health", tags=["Health"])
 def health() -> dict:
     return {"status": "ok", "versao": settings.VERSION}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "8000")),
+        reload=settings.DEBUG,
+    )

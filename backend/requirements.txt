@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 pymysql
+psycopg[binary]
 alembic
 pydantic
 pydantic-settings

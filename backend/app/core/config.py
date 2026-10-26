@@ -1,11 +1,20 @@
 from functools import lru_cache
+from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
+    # O backend lê primeiro o seu .env e, depois, o .env.local da raiz
+    # gerado por `neon deploy` (que tem precedência).
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=(BACKEND_DIR / ".env", PROJECT_ROOT / ".env.local"),
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     PROJECT_NAME: str = "CLOP Academy"
@@ -19,7 +28,13 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_PREFIX: str = "/api"
 
-    DATABASE_URL: str = "mysql+pymysql://root@localhost:3306/clop_academy"
+    # Connection string da base de dados. Em produção (Render) defina a
+    # variável de ambiente DATABASE_URL com a connection string da base de
+    # dados gerida — nunca localhost, porque a base de dados não corre no
+    # mesmo container da aplicação.
+    DATABASE_URL: str
+    # URL direto (sem pooler) usado pelo Alembic em migrações.
+    DATABASE_URL_UNPOOLED: str | None = None
     SECRET_KEY: str = "troque_este_segredo_por_um_valor_aleatorio"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -54,6 +69,43 @@ class Settings(BaseSettings):
     MARKET_BODIVA_API_KEY: str = ""
     MARKET_CACHE_TTL_SECONDS: int = 300
     MARKET_REQUEST_TIMEOUT_SECONDS: int = 10
+
+    @staticmethod
+    def _with_psycopg_driver(url: str) -> str:
+        """Garante o driver psycopg 3 nos URLs PostgreSQL da Neon."""
+        if url.startswith("postgres://"):
+            return "postgresql+psycopg://" + url[len("postgres://") :]
+        if url.startswith("postgresql://"):
+            return "postgresql+psycopg://" + url[len("postgresql://") :]
+        return url
+
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        """URL pooled usado pela aplicação (PgBouncer em modo transacção)."""
+        return self._with_psycopg_driver(self.DATABASE_URL)
+
+    @property
+    def migration_database_url(self) -> str:
+        """URL direto usado pelo Alembic (sem PgBouncer)."""
+        return self._with_psycopg_driver(
+            self.DATABASE_URL_UNPOOLED or self.DATABASE_URL
+        )
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _database_url_nao_aponta_localhost_em_producao(
+        cls, v: str, info
+    ) -> str:
+        ambiente = str((info.data or {}).get("ENVIRONMENT", "development")).lower()
+        if ambiente in {"production", "prod"} and any(
+            host in v for host in ("localhost", "127.0.0.1")
+        ):
+            raise ValueError(
+                "DATABASE_URL não pode apontar para localhost em produção. "
+                "Defina a variável de ambiente DATABASE_URL com a connection "
+                "string da base de dados do Render."
+            )
+        return v
 
     @property
     def cors_origins_list(self) -> list[str]:

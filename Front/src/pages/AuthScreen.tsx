@@ -24,7 +24,8 @@ import {
 } from 'lucide-react'
 import { BrandMark } from '../components/BrandMark'
 import { institution } from '../config/institution'
-import { ApiError, authApi, type AuthUser } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
+import { ApiError } from '../lib/api'
 import '../styles/auth.css'
 
 type Mode = 'login' | 'register'
@@ -56,15 +57,6 @@ const PROVINCES = [
 
 const INTRO_KEY = 'clop:intro-seen'
 
-const ROLE_LABELS: Record<string, string> = {
-  STUDENT: 'Aluno',
-  INSTRUCTOR: 'Formador',
-  EDITOR: 'Editor',
-  FINANCE: 'Financeiro',
-  ADMIN: 'Administrador',
-  SUPERADMIN: 'Superadministrador',
-}
-
 function checksForPassword(password: string) {
   return [
     { label: 'Pelo menos 8 caracteres', ok: password.length >= 8 },
@@ -88,16 +80,8 @@ function errorMessages(error: unknown): string[] {
   return ['Ocorreu um erro inesperado. Tente novamente.']
 }
 
-function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] ?? name
-}
-
 export default function AuthScreen({ mode }: AuthScreenProps) {
-  const [user, setUser] = useState<AuthUser | null>(() => authApi.cachedUser())
-  const [validating, setValidating] = useState(
-    () => authApi.hasSession() && !authApi.cachedUser(),
-  )
-  const [sessionWarning, setSessionWarning] = useState('')
+  const { login, register } = useAuth()
   const [errors, setErrors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -128,41 +112,6 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     setConfirm('')
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [mode])
-
-  useEffect(() => {
-    if (!authApi.hasSession()) {
-      setValidating(false)
-      return
-    }
-
-    let active = true
-
-    authApi
-      .me()
-      .then((current) => {
-        if (!active) return
-        setUser(current)
-        setSessionWarning('')
-      })
-      .catch((error: unknown) => {
-        if (!active) return
-        if (error instanceof ApiError && error.status === 401) {
-          authApi.logout()
-          setUser(null)
-        } else {
-          setSessionWarning(
-            'Não foi possível confirmar a sessão com o servidor. Os dados apresentados podem estar desactualizados.',
-          )
-        }
-      })
-      .finally(() => {
-        if (active) setValidating(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [])
 
   useEffect(() => {
     const video = stageVideoRef.current
@@ -230,9 +179,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     setLoading(true)
 
     try {
-      const response = await authApi.login({ email, password: secret }, remember)
-      setUser(response.user)
-      setSessionWarning('')
+      await login({ email, password: secret }, remember)
     } catch (error) {
       setErrors(errorMessages(error))
     } finally {
@@ -273,7 +220,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     setLoading(true)
 
     try {
-      const response = await authApi.register(
+      await register(
         {
           nome_completo: name,
           email,
@@ -287,8 +234,6 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
         },
         remember,
       )
-      setUser(response.user)
-      setSessionWarning('')
     } catch (error) {
       setErrors(errorMessages(error))
     } finally {
@@ -298,13 +243,6 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
 
   function handlePasswordKey(event: KeyboardEvent<HTMLInputElement>) {
     setCapsLock(event.getModifierState('CapsLock'))
-  }
-
-  function signOut() {
-    authApi.logout()
-    setUser(null)
-    setSessionWarning('')
-    setErrors([])
   }
 
   const rules = checksForPassword(password)
@@ -376,72 +314,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
           </a>
         </div>
 
-        {validating && !user ? (
-          <section className="auth-card auth-card--loading" aria-live="polite">
-            <LoaderCircle className="auth-spin" size={26} aria-hidden="true" />
-            <p>A confirmar a sua sessão…</p>
-          </section>
-        ) : user ? (
-          <section className="auth-card auth-card--session">
-            <div className="auth-success-mark" aria-hidden="true">
-              <Check size={26} strokeWidth={2.2} />
-            </div>
-            <p className="auth-eyebrow">
-              <span />
-              Sessão iniciada
-            </p>
-            <h1>Bem-vindo, {firstName(user.nome_completo)}.</h1>
-            <p className="auth-lead">
-              O seu acesso à CLOP Academia Digital está activo. Continue para o portal e
-              acompanhe as próximas formações, conteúdos e iniciativas.
-            </p>
-
-            {sessionWarning && (
-              <div className="auth-alert auth-alert--notice" role="status">
-                <CircleAlert size={18} aria-hidden="true" />
-                <div>
-                  <p>{sessionWarning}</p>
-                </div>
-              </div>
-            )}
-
-            <dl className="auth-session">
-              <div>
-                <dt>E-mail</dt>
-                <dd>{user.email}</dd>
-              </div>
-              <div>
-                <dt>Perfil</dt>
-                <dd>{ROLE_LABELS[user.role] ?? user.role}</dd>
-              </div>
-              {user.perfil_aluno?.provincia && (
-                <div>
-                  <dt>Província</dt>
-                  <dd>{user.perfil_aluno.provincia}</dd>
-                </div>
-              )}
-              <div>
-                <dt>Estado</dt>
-                <dd className="auth-session__state">
-                  <span aria-hidden="true" />
-                  {user.estado === 'ACTIVE' ? 'Conta activa' : user.estado}
-                </dd>
-              </div>
-            </dl>
-
-            <a className="auth-submit" href="#inicio">
-              Explorar o portal
-              <ArrowRight size={17} aria-hidden="true" />
-            </a>
-            <button className="auth-secondary" type="button" onClick={signOut}>
-              Terminar sessão
-            </button>
-            <p className="auth-legal">
-              Sessão protegida por autenticação CLOP. Não partilhe as suas credenciais.
-            </p>
-          </section>
-        ) : (
-          <section className="auth-card">
+        <section className="auth-card">
             <div className="auth-card__glow" aria-hidden="true" />
 
             <div className="auth-tabs" role="tablist" aria-label="Acesso à conta">
@@ -770,8 +643,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
               <br />
               Acesso protegido. Nunca partilhe as suas credenciais.
             </p>
-          </section>
-        )}
+        </section>
 
         <footer className="auth-foot">
           <span>© {new Date().getFullYear()} CLOP Academia Digital</span>

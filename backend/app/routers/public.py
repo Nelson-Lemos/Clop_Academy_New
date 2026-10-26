@@ -146,7 +146,7 @@ def home(db: Session = Depends(get_db)) -> dict:
         db.query(Article)
         .filter(Article.estado == ArticleStatus.PUBLICADO)
         .order_by(
-            func.isnull(Article.publicado_em).asc(),
+            Article.publicado_em.is_(None).asc(),
             Article.publicado_em.desc(),
         )
         .limit(6)
@@ -283,7 +283,7 @@ def listar_artigos(
     total = query.count()
     artigos = (
         query.order_by(
-            func.isnull(Article.publicado_em).asc(),
+            Article.publicado_em.is_(None).asc(),
             Article.publicado_em.desc(),
             Article.id.desc(),
         )

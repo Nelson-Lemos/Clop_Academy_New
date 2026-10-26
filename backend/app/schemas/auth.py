@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, EmailStr, Field
 
 from app.models.user import UserRole, UserStatus
 
@@ -77,7 +77,9 @@ class MeOut(BaseModel):
     estado: str = UserStatus.ACTIVE
     aceite_termos_em: datetime | None = None
     email_verificado_em: datetime | None = None
-    criado_em: datetime
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
     perfil_aluno: StudentProfileOut | None = None
     permissoes: list[str] = []
 

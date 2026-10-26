@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class EnrollmentCreate(BaseModel):
@@ -24,7 +24,10 @@ class EnrollmentOut(BaseModel):
     percentagem_progresso: int
     iniciado_em: datetime | None = None
     concluido_em: datetime | None = None
-    criado_em: datetime
+    # O modelo usa created_at; a API expõe criado_em.
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
 
 
 class EnrollmentCourseOut(EnrollmentOut):
@@ -151,7 +154,9 @@ class PaymentOut(BaseModel):
 
     id: int
     enrollment_id: int
-    curso_id: int
+    curso_id: int = Field(
+        validation_alias=AliasChoices("curso_id", "course_id")
+    )
     referencia: str
     valor: Decimal
     moeda: str
@@ -161,7 +166,9 @@ class PaymentOut(BaseModel):
     provider_reference: str | None = None
     notas: str | None = None
     confirmado_em: datetime | None = None
-    criado_em: datetime
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
 
 
 class PaymentAdminOut(PaymentOut):
@@ -187,7 +194,9 @@ class CertificateOut(BaseModel):
 
     id: int
     codigo: str
-    curso_id: int
+    curso_id: int = Field(
+        validation_alias=AliasChoices("curso_id", "course_id")
+    )
     enrollment_id: int
     estado: str
     nota_final: int | None = None

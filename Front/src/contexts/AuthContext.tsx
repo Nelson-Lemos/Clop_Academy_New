@@ -9,14 +9,16 @@ import {
   authApi,
   type AuthUser,
   type AuthResponse,
+  type LoginPayload,
+  type RegisterPayload,
 } from '../lib/api'
 
 type AuthContextType = {
   user: AuthUser | null
   loading: boolean
   isAuthenticated: boolean
-  login: (email: string, password: string, remember?: boolean) => Promise<AuthResponse | null>
-  register: (payload: any, remember?: boolean) => Promise<AuthResponse | null>
+  login: (payload: LoginPayload, remember?: boolean) => Promise<AuthResponse>
+  register: (payload: RegisterPayload, remember?: boolean) => Promise<AuthResponse>
   logout: () => void
   refreshUser: () => Promise<void>
 }
@@ -50,30 +52,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (
-    email: string,
-    password: string,
+    payload: LoginPayload,
     remember = true
-  ): Promise<AuthResponse | null> => {
-    try {
-      const response = await authApi.login({ email, password }, remember)
-      setUser(response.user)
-      return response
-    } catch {
-      return null
-    }
+  ): Promise<AuthResponse> => {
+    const response = await authApi.login(payload, remember)
+    setUser(response.user)
+    return response
   }
 
   const register = async (
-    payload: any,
+    payload: RegisterPayload,
     remember = true
-  ): Promise<AuthResponse | null> => {
-    try {
-      const response = await authApi.register(payload, remember)
-      setUser(response.user)
-      return response
-    } catch {
-      return null
-    }
+  ): Promise<AuthResponse> => {
+    const response = await authApi.register(payload, remember)
+    setUser(response.user)
+    return response
   }
 
   const logout = () => {

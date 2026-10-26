@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class LessonMaterialOut(BaseModel):
@@ -104,8 +104,12 @@ class CourseDetailOut(CourseOut):
 
 
 class CourseAdminOut(CourseDetailOut):
-    criado_em: datetime
-    actualizado_em: datetime
+    criado_em: datetime = Field(
+        validation_alias=AliasChoices("criado_em", "created_at")
+    )
+    actualizado_em: datetime = Field(
+        validation_alias=AliasChoices("actualizado_em", "updated_at")
+    )
 
 
 class CourseCreate(BaseModel):
